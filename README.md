@@ -148,6 +148,14 @@ above a low-impact, high-effort one.
   etc.), which require active testing out of scope for this tool.
 - SEO findings describe documented best practice; no tool can guarantee
   search ranking outcomes.
+- **`npm run lint` is currently a no-op.** `typescript-eslint` hard-refuses
+  to load against this project's TypeScript 7.x (the native/Go-rewrite
+  compiler) — see [microsoft/TypeScript#... / typescript-eslint#10940](https://github.com/typescript-eslint/typescript-eslint/issues/10940).
+  Downgrading to TypeScript 6.x would fix this but was deliberately avoided
+  to keep the project on current tooling; `npm run typecheck` (`tsc
+  --noEmit`) is the real static-analysis gate in the meantime, and `npm
+  run lint` just prints a pointer to this note. Revisit once
+  typescript-eslint ships TS 7+ support.
 
 ## Safety
 
