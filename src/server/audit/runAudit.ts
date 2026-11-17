@@ -7,7 +7,7 @@ import { newIsolatedContext } from "../browser/chromium";
 import { DEVICE_PROFILES } from "../browser/chromium";
 import { CRAWL_DEFAULTS } from "../config/thresholds";
 import { runLighthouseMedian, toPageMetrics, LIGHTHOUSE_VERSION } from "../engines/lighthouse";
-import { runAxe, runPa11y, runManualHeuristicChecks, AXE_CORE_VERSION, PA11Y_VERSION } from "../engines/accessibility";
+import { runAxe, runPa11y, runManualHeuristicChecks, injectAxeIntoContext, AXE_CORE_VERSION, PA11Y_VERSION } from "../engines/accessibility";
 import {
   gradeSecurityHeaders,
   checkTls,
@@ -81,6 +81,7 @@ export async function runAudit(input: RunAuditInput): Promise<string> {
       const desktopPageId = randomUUID();
       if (!firstDesktopAuditPageId) firstDesktopAuditPageId = desktopPageId;
       const desktopContext = await newIsolatedContext(DEVICE_PROFILES.desktop);
+      await injectAxeIntoContext(desktopContext);
       const desktopPage = await desktopContext.newPage();
 
       let html = "";
@@ -89,6 +90,20 @@ export async function runAudit(input: RunAuditInput): Promise<string> {
       let loadOk = true;
       let loadError: string | null = null;
       const pageFindings: FindingDraft[] = [];
+
+      // A failure in any ONE check below must not wipe out findings from the
+      // others, so each risky step gets its own try/catch and logs a warning
+      // instead of aborting the whole page (e.g. a strict CSP blocking
+      // axe-core's script injection shouldn't also lose the SEO/header findings).
+      const safely = async (label: string, fn: () => Promise<void> | void) => {
+        try {
+          await fn();
+        } catch (err) {
+          log(`${label} failed for ${target.url}: ${err instanceof Error ? err.message : err}`);
+        }
+      };
+
+      let facts: SeoPageFacts | null = null;
 
       try {
         const response = await desktopPage.goto(target.url, {
@@ -102,103 +117,126 @@ export async function runAudit(input: RunAuditInput): Promise<string> {
         }
         headers = response?.headers() ?? {};
         html = await desktopPage.content();
-
-        const facts = extractSeoFacts(html, target.url);
-        allSeoFacts.push(facts);
-        linksBySourcePage.set(target.url, facts.internalLinks);
-        pageFindings.push(...runSeoPageChecks(facts, target.pageType));
-
-        const headerResult = gradeSecurityHeaders(headers, target.url);
-        pageFindings.push(...headerResult.findings);
-        pageFindings.push(...mixedContentFindings(html, target.url));
-
-        if (!tlsCache.has(hostname)) {
-          tlsCache.set(hostname, await checkTls(hostname));
-        }
-        const tlsInfo = tlsCache.get(hostname)!;
-        if (tlsInfo.httpsRedirect === null) {
-          tlsInfo.httpsRedirect = await checkHttpsRedirect(target.url);
-        }
-        pageFindings.push(...tlsFindings(tlsInfo, target.url));
-        if (tlsInfo.httpsRedirect === false) {
-          pageFindings.push({
-            category: "security",
-            engine: "tls-check",
-            title: "HTTP does not redirect to HTTPS",
-            explanation: "Requesting the HTTP version of this page did not result in an HTTPS redirect.",
-            businessImpact: "Visitors who type the address without https:// (or follow an old http:// link) stay on an insecure connection.",
-            severity: "medium",
-            effort: "low",
-            impact: "medium",
-            evidence: [{ pageUrl: target.url }],
-            fixSuggestion: "Configure the web server to redirect all HTTP requests to HTTPS with a 301.",
-            wcagCriteria: [],
-            groupKeyOverride: "tls-check:no-https-redirect",
-          });
-        }
-
-        pageFindings.push(...(await runAxe(desktopPage, target.url)));
-        pageFindings.push(...(await runManualHeuristicChecks(desktopPage, target.url)));
-        pageFindings.push(...(await runPa11y(target.url, target.url)));
-
-        const readability = computeReadability(html);
-        const readFinding = readabilityFinding(readability, target.url);
-        if (readFinding) pageFindings.push(readFinding);
-        pageFindings.push(...(await checkBrokenImagesAndFavicon(desktopPage, target.url)));
-        pageFindings.push(...checkContactInfoPresence(facts, html));
-
-        const thirdParty = inventoryThirdPartyScripts(html, target.url);
-        if (thirdParty.length > 0) {
-          pageFindings.push({
-            category: "security",
-            engine: "third-party-inventory",
-            title: `${thirdParty.length} third-party script domain(s) loaded`,
-            explanation: `Scripts are loaded from: ${thirdParty.map((t) => `${t.domain} (${t.category})`).join(", ")}.`,
-            businessImpact: "Each third-party script is a privacy consideration and a small performance/security trust dependency; review whether all are necessary and disclosed in your privacy policy.",
-            severity: "info",
-            effort: "low",
-            impact: "low",
-            evidence: [{ pageUrl: target.url, value: thirdParty.map((t) => t.domain).join(", ") }],
-            fixSuggestion: "Remove any third-party scripts you no longer need, and disclose the rest in your privacy/cookie policy.",
-            wcagCriteria: [],
-            groupKeyOverride: "third-party-inventory:scripts",
-          });
-          if (!detectCookieBanner(html)) {
-            pageFindings.push({
-              category: "security",
-              engine: "third-party-inventory",
-              title: "Third-party tracking scripts present but no cookie banner detected",
-              explanation: "The page loads analytics/advertising scripts but no cookie-consent banner markup or text was detected.",
-              businessImpact: "Many jurisdictions (e.g. under GDPR) require consent before non-essential tracking; this may be a compliance gap worth a legal review.",
-              severity: "medium",
-              effort: "medium",
-              impact: "medium",
-              evidence: [{ pageUrl: target.url }],
-              fixSuggestion: "Add a cookie consent mechanism before non-essential trackers load, and consult counsel on applicable requirements.",
-              wcagCriteria: [],
-              groupKeyOverride: "third-party-inventory:no-cookie-banner",
-            });
-          }
-        }
-        if (detectDirectoryListing(html)) {
-          pageFindings.push({
-            category: "security",
-            engine: "exposure-check",
-            title: "Directory listing appears to be enabled",
-            explanation: "The response looks like an auto-generated directory index rather than a normal page.",
-            businessImpact: "Directory listings can expose files that were never meant to be browsable, including backups or configuration files.",
-            severity: "high",
-            effort: "low",
-            impact: "high",
-            evidence: [{ pageUrl: target.url }],
-            fixSuggestion: "Disable directory listing/autoindex on the web server for this path.",
-            wcagCriteria: [],
-            groupKeyOverride: "exposure-check:directory-listing",
-          });
-        }
       } catch (err) {
         loadOk = false;
         loadError = err instanceof Error ? err.message : "Failed to load page";
+        log(`Error loading ${target.url}: ${loadError}`);
+      }
+
+      if (loadOk) {
+        await safely("SEO checks", () => {
+          facts = extractSeoFacts(html, target.url);
+          allSeoFacts.push(facts);
+          linksBySourcePage.set(target.url, facts.internalLinks);
+          pageFindings.push(...runSeoPageChecks(facts, target.pageType));
+        });
+
+        await safely("Security header check", () => {
+          const headerResult = gradeSecurityHeaders(headers, target.url);
+          pageFindings.push(...headerResult.findings);
+          pageFindings.push(...mixedContentFindings(html, target.url));
+        });
+
+        await safely("TLS check", async () => {
+          if (!tlsCache.has(hostname)) {
+            tlsCache.set(hostname, await checkTls(hostname));
+          }
+          const tlsInfo = tlsCache.get(hostname)!;
+          if (tlsInfo.httpsRedirect === null) {
+            tlsInfo.httpsRedirect = await checkHttpsRedirect(target.url);
+          }
+          pageFindings.push(...tlsFindings(tlsInfo, target.url));
+          if (tlsInfo.httpsRedirect === false) {
+            pageFindings.push({
+              category: "security",
+              engine: "tls-check",
+              title: "HTTP does not redirect to HTTPS",
+              explanation: "Requesting the HTTP version of this page did not result in an HTTPS redirect.",
+              businessImpact: "Visitors who type the address without https:// (or follow an old http:// link) stay on an insecure connection.",
+              severity: "medium",
+              effort: "low",
+              impact: "medium",
+              evidence: [{ pageUrl: target.url }],
+              fixSuggestion: "Configure the web server to redirect all HTTP requests to HTTPS with a 301.",
+              wcagCriteria: [],
+              groupKeyOverride: "tls-check:no-https-redirect",
+            });
+          }
+        });
+
+        await safely("axe-core", async () => {
+          pageFindings.push(...(await runAxe(desktopPage, target.url)));
+        });
+        await safely("Manual accessibility heuristics", async () => {
+          pageFindings.push(...(await runManualHeuristicChecks(desktopPage, target.url)));
+        });
+        await safely("Pa11y", async () => {
+          pageFindings.push(...(await runPa11y(target.url, target.url)));
+        });
+
+        await safely("Readability check", () => {
+          const readability = computeReadability(html);
+          const readFinding = readabilityFinding(readability, target.url);
+          if (readFinding) pageFindings.push(readFinding);
+        });
+        await safely("Broken image/favicon check", async () => {
+          pageFindings.push(...(await checkBrokenImagesAndFavicon(desktopPage, target.url)));
+        });
+        await safely("Contact info check", () => {
+          if (facts) pageFindings.push(...checkContactInfoPresence(facts, html));
+        });
+
+        await safely("Third-party script/cookie-banner check", () => {
+          const thirdParty = inventoryThirdPartyScripts(html, target.url);
+          if (thirdParty.length > 0) {
+            pageFindings.push({
+              category: "security",
+              engine: "third-party-inventory",
+              title: `${thirdParty.length} third-party script domain(s) loaded`,
+              explanation: `Scripts are loaded from: ${thirdParty.map((t) => `${t.domain} (${t.category})`).join(", ")}.`,
+              businessImpact: "Each third-party script is a privacy consideration and a small performance/security trust dependency; review whether all are necessary and disclosed in your privacy policy.",
+              severity: "info",
+              effort: "low",
+              impact: "low",
+              evidence: [{ pageUrl: target.url, value: thirdParty.map((t) => t.domain).join(", ") }],
+              fixSuggestion: "Remove any third-party scripts you no longer need, and disclose the rest in your privacy/cookie policy.",
+              wcagCriteria: [],
+              groupKeyOverride: "third-party-inventory:scripts",
+            });
+            if (!detectCookieBanner(html)) {
+              pageFindings.push({
+                category: "security",
+                engine: "third-party-inventory",
+                title: "Third-party tracking scripts present but no cookie banner detected",
+                explanation: "The page loads analytics/advertising scripts but no cookie-consent banner markup or text was detected.",
+                businessImpact: "Many jurisdictions (e.g. under GDPR) require consent before non-essential tracking; this may be a compliance gap worth a legal review.",
+                severity: "medium",
+                effort: "medium",
+                impact: "medium",
+                evidence: [{ pageUrl: target.url }],
+                fixSuggestion: "Add a cookie consent mechanism before non-essential trackers load, and consult counsel on applicable requirements.",
+                wcagCriteria: [],
+                groupKeyOverride: "third-party-inventory:no-cookie-banner",
+              });
+            }
+          }
+          if (detectDirectoryListing(html)) {
+            pageFindings.push({
+              category: "security",
+              engine: "exposure-check",
+              title: "Directory listing appears to be enabled",
+              explanation: "The response looks like an auto-generated directory index rather than a normal page.",
+              businessImpact: "Directory listings can expose files that were never meant to be browsable, including backups or configuration files.",
+              severity: "high",
+              effort: "low",
+              impact: "high",
+              evidence: [{ pageUrl: target.url }],
+              fixSuggestion: "Disable directory listing/autoindex on the web server for this path.",
+              wcagCriteria: [],
+              groupKeyOverride: "exposure-check:directory-listing",
+            });
+          }
+        });
       }
 
       let desktopLighthouse;

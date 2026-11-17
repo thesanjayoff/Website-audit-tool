@@ -14,9 +14,22 @@ type JobState = {
   error?: string;
 };
 
-const jobs = new Map<string, JobState>();
-const emitter = new EventEmitter();
+declare global {
+  // eslint-disable-next-line no-var
+  var __auditToolJobs: Map<string, JobState> | undefined;
+  // eslint-disable-next-line no-var
+  var __auditToolJobEmitter: EventEmitter | undefined;
+}
+
+// Next.js dev mode can re-evaluate this module between requests (Fast
+// Refresh/Turbopack invalidation), which would otherwise silently reset this
+// in-memory job registry mid-audit. Pin it to the process via globalThis, the
+// same trick used for the SQLite client singleton.
+const jobs = globalThis.__auditToolJobs ?? new Map<string, JobState>();
+const emitter = globalThis.__auditToolJobEmitter ?? new EventEmitter();
 emitter.setMaxListeners(100);
+globalThis.__auditToolJobs = jobs;
+globalThis.__auditToolJobEmitter = emitter;
 
 const MAX_LOG_LINES = 500;
 

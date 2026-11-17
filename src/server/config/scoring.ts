@@ -55,13 +55,15 @@ export function weightedAverage(parts: Array<{ value: number; weight: number }>)
   return Math.round((sum / totalWeight) * 10) / 10;
 }
 
-export const EFFORT_IMPACT_PRIORITY_SCORE: Record<"low" | "medium" | "high", number> = {
-  low: 3,
-  medium: 2,
-  high: 1,
-};
+// Deliberately separate tables: a "high" rating is good news for impact
+// (weight it up) but bad news for effort (weight it down). Reusing one
+// shared table for both — as an earlier version of this function did —
+// silently inverted the ranking, scoring "low impact/high effort" above
+// "high impact/low effort".
+const IMPACT_SCORE: Record<"low" | "medium" | "high", number> = { low: 1, medium: 2, high: 3 };
+const EFFORT_SCORE: Record<"low" | "medium" | "high", number> = { low: 3, medium: 2, high: 1 };
 
 /** Higher is more urgent: high impact + low effort bubbles to the top. */
 export function priorityScore(impact: "low" | "medium" | "high", effort: "low" | "medium" | "high"): number {
-  return EFFORT_IMPACT_PRIORITY_SCORE[impact] * 3 - EFFORT_IMPACT_PRIORITY_SCORE[effort];
+  return IMPACT_SCORE[impact] * 3 + EFFORT_SCORE[effort];
 }

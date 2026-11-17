@@ -30,7 +30,29 @@ function isDisallowedIp(ip: string): boolean {
   return range !== "unicast";
 }
 
+/**
+ * Narrow, explicit, opt-in escape hatch: a comma-separated list of exact
+ * hostnames (e.g. "127.0.0.1") that may resolve to a private/loopback
+ * address. This exists ONLY so this tool's own test suite can audit its
+ * local fixture server without weakening SSRF protection for real audits —
+ * it is never set in a normal deployment, and only ever matches a hostname
+ * by exact string, never a range, so it can't be used to allowlist "the
+ * internet". Leave SSRF_ALLOWLIST_HOSTS unset in production.
+ */
+function isAllowlistedForTesting(hostname: string): boolean {
+  const allowlist = (process.env.SSRF_ALLOWLIST_HOSTS ?? "").split(",").map((h) => h.trim()).filter(Boolean);
+  return allowlist.includes(hostname);
+}
+
 async function resolveAndValidate(hostname: string): Promise<string> {
+  if (isAllowlistedForTesting(hostname)) {
+    if (ipaddr.isValid(hostname)) return hostname;
+    const records = await dns.promises.lookup(hostname, { all: true, verbatim: true });
+    const first = records[0];
+    if (!first) throw new SsrfBlockedError(`Could not resolve hostname: ${hostname}`);
+    return first.address;
+  }
+
   // Reject literal IPs that are disallowed before even looking up anything else.
   if (ipaddr.isValid(hostname)) {
     if (isDisallowedIp(hostname)) {

@@ -69,8 +69,25 @@ function wcagCriteriaFromTags(tags: string[]): string[] {
     });
 }
 
+/**
+ * Injects axe-core into a browser context via `addInitScript`, which runs
+ * through CDP's Page.addScriptToEvaluateOnNewDocument rather than inserting a
+ * DOM <script> tag — so it survives even a strict `script-src`/`default-src`
+ * CSP that would otherwise block a page.addScriptTag() injection. Call this
+ * once per context before navigating any of its pages.
+ */
+export async function injectAxeIntoContext(context: { addInitScript: (opts: { content: string }) => Promise<unknown> }): Promise<void> {
+  await context.addInitScript({ content: await getAxeSource() });
+}
+
 export async function runAxe(page: Page, pageUrl: string): Promise<FindingDraft[]> {
-  await page.addScriptTag({ content: await getAxeSource() });
+  const hasAxe = await page.evaluate(() => typeof (window as unknown as { axe?: unknown }).axe !== "undefined");
+  if (!hasAxe) {
+    // Fallback for contexts that didn't get injectAxeIntoContext (or a page
+    // that never ran its init scripts, e.g. about:blank) — best effort, may
+    // itself be blocked by a strict CSP with no injected-script exemption.
+    await page.addScriptTag({ content: await getAxeSource() });
+  }
   const result = (await page.evaluate(() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (window as any).axe.run(document, {

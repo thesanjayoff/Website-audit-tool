@@ -227,64 +227,67 @@ export async function checkHttpsRedirect(pageUrl: string): Promise<boolean | nul
   }
 }
 
+function failedTlsInfo(error: string): TlsInfo {
+  return {
+    valid: false,
+    issuer: null,
+    validFrom: null,
+    validTo: null,
+    daysUntilExpiry: null,
+    protocol: null,
+    cipher: null,
+    httpsRedirect: null,
+    error,
+  };
+}
+
 /** Direct TLS handshake (not via HTTP) so we see the real certificate and negotiated protocol/cipher. */
 export async function checkTls(hostname: string): Promise<TlsInfo> {
   return new Promise((resolve) => {
-    const socket = tls.connect(
-      {
+    // TLS SNI's `servername` can't be a literal IP — Node throws synchronously
+    // if you try, so omit it in that case; there's no hostname to present anyway.
+    const isIpLiteral = /^[0-9.]+$/.test(hostname) || hostname.includes(":");
+
+    let socket: tls.TLSSocket;
+    try {
+      socket = tls.connect({
         host: hostname,
         port: 443,
-        servername: hostname,
+        ...(isIpLiteral ? {} : { servername: hostname }),
         timeout: 10_000,
         rejectUnauthorized: false, // we want to inspect even an invalid cert, not throw
-      },
-      () => {
-        const cert = socket.getPeerCertificate();
-        const protocol = socket.getProtocol();
-        const cipher = socket.getCipher();
-        const validTo = cert?.valid_to ? new Date(cert.valid_to) : null;
-        const daysUntilExpiry = validTo ? Math.round((validTo.getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : null;
-
-        resolve({
-          valid: socket.authorized || false,
-          issuer: (cert?.issuer?.O || cert?.issuer?.CN) ? String(cert.issuer.O || cert.issuer.CN) : null,
-          validFrom: cert?.valid_from ?? null,
-          validTo: cert?.valid_to ?? null,
-          daysUntilExpiry,
-          protocol: protocol ?? null,
-          cipher: cipher?.name ?? null,
-          httpsRedirect: null,
-          error: socket.authorized ? null : socket.authorizationError?.toString() ?? "Certificate not trusted",
-        });
-        socket.end();
-      },
-    );
-    socket.on("error", (err) => {
-      resolve({
-        valid: false,
-        issuer: null,
-        validFrom: null,
-        validTo: null,
-        daysUntilExpiry: null,
-        protocol: null,
-        cipher: null,
-        httpsRedirect: null,
-        error: err.message,
       });
+    } catch (err) {
+      resolve(failedTlsInfo(err instanceof Error ? err.message : "Could not open a TLS connection"));
+      return;
+    }
+
+    socket.on("secureConnect", () => {
+      const cert = socket.getPeerCertificate();
+      const protocol = socket.getProtocol();
+      const cipher = socket.getCipher();
+      const validTo = cert?.valid_to ? new Date(cert.valid_to) : null;
+      const daysUntilExpiry = validTo ? Math.round((validTo.getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : null;
+
+      resolve({
+        valid: socket.authorized || false,
+        issuer: (cert?.issuer?.O || cert?.issuer?.CN) ? String(cert.issuer.O || cert.issuer.CN) : null,
+        validFrom: cert?.valid_from ?? null,
+        validTo: cert?.valid_to ?? null,
+        daysUntilExpiry,
+        protocol: protocol ?? null,
+        cipher: cipher?.name ?? null,
+        httpsRedirect: null,
+        error: socket.authorized ? null : socket.authorizationError?.toString() ?? "Certificate not trusted",
+      });
+      socket.end();
+    });
+    socket.on("error", (err) => {
+      resolve(failedTlsInfo(err.message));
     });
     socket.on("timeout", () => {
       socket.destroy();
-      resolve({
-        valid: false,
-        issuer: null,
-        validFrom: null,
-        validTo: null,
-        daysUntilExpiry: null,
-        protocol: null,
-        cipher: null,
-        httpsRedirect: null,
-        error: "TLS connection timed out",
-      });
+      resolve(failedTlsInfo("TLS connection timed out"));
     });
   });
 }

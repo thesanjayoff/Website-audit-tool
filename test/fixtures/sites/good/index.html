@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Clean Reference Site — Home</title>
+  <meta name="description" content="A small, clean reference site used to verify the audit tool doesn't produce false positives." />
+  <link rel="canonical" href="http://127.0.0.1:4173/good/index.html" />
+  <link rel="icon" href="/good/favicon.ico" />
+  <meta property="og:title" content="Clean Reference Site" />
+  <meta property="og:description" content="A small, clean reference site." />
+  <meta property="og:image" content="http://127.0.0.1:4173/good/logo.png" />
+  <script type="application/ld+json">
+    {"@context":"https://schema.org","@type":"Organization","name":"Clean Reference Site","url":"http://127.0.0.1:4173/good/"}
+  </script>
+  <style>
+    body { font-family: system-ui, sans-serif; font-size: 16px; line-height: 1.6; color: #111; background: #fff; max-width: 700px; margin: 2rem auto; padding: 0 1rem; }
+    a { color: #1d4ed8; }
+    a:focus { outline: 3px solid #1d4ed8; outline-offset: 2px; }
+    nav a { margin-right: 1rem; }
+    .btn { display: inline-block; padding: 12px 20px; min-height: 24px; min-width: 24px; background: #1d4ed8; color: #fff; border-radius: 6px; text-decoration: none; }
+    footer { margin-top: 3rem; color: #333; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+  <nav aria-label="Primary">
+    <a href="/good/index.html">Home</a>
+    <a href="/good/about.html">About</a>
+    <a href="/good/contact.html">Contact</a>
+  </nav>
+  <main id="main">
+    <h1>Welcome to the Clean Reference Site</h1>
+    <p>
+      This page exists purely so the Website Audit Tool has a known-good baseline to measure against. It has a clear
+      heading structure, readable short sentences, a visible focus style, labelled form fields, and modest, well
+      described images. There is enough text here for the readability and thin-content checks to have something
+      real to evaluate, without resorting to filler or keyword stuffing of any kind.
+    </p>
+    <h2>Why this page is boring on purpose</h2>
+    <p>
+      Every automated check needs a page it expects to pass, otherwise there is no way to tell a genuine false
+      positive from a real problem. Keeping this content calm, plain, and consistent makes the tool's own test
+      suite meaningful.
+    </p>
+    <img src="/good/logo.png" alt="Clean Reference Site logo: a simple blue circle" width="120" height="120" />
+    <form aria-label="Newsletter signup">
+      <label for="email">Email address</label>
+      <input id="email" name="email" type="email" autocomplete="email" />
+      <button class="btn" type="submit">Subscribe to updates</button>
+    </form>
+    <p><a class="btn" href="/good/about.html">Read more about this project</a></p>
+  </main>
+  <footer>
+    <p>Contact: hello@example-clean-site.test · +1 (555) 010-0100 · 123 Example Street, Springfield</p>
+  </footer>
+</body>
+</html>
