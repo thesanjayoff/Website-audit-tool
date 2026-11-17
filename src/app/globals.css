@@ -1,0 +1,83 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #f6f7fb;
+  --bg-elevated: #ffffff;
+  --border: #e4e7ee;
+  --text: #171923;
+  --text-muted: #5b6475;
+  --accent: #4f46e5;
+  --accent-contrast: #ffffff;
+  --good: #16a34a;
+  --warn: #d97706;
+  --bad: #dc2626;
+  --critical: #991b1b;
+}
+
+:root[data-theme="dark"] {
+  --bg: #0b0e14;
+  --bg-elevated: #12161f;
+  --border: #232838;
+  --text: #e6e8ee;
+  --text-muted: #94a0b8;
+  --accent: #818cf8;
+  --accent-contrast: #0b0e14;
+  --good: #4ade80;
+  --warn: #fbbf24;
+  --bad: #f87171;
+  --critical: #fca5a5;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0b0e14;
+    --bg-elevated: #12161f;
+    --border: #232838;
+    --text: #e6e8ee;
+    --text-muted: #94a0b8;
+    --accent: #818cf8;
+    --accent-contrast: #0b0e14;
+    --good: #4ade80;
+    --warn: #fbbf24;
+    --bad: #f87171;
+    --critical: #fca5a5;
+  }
+}
+
+html, body {
+  background: var(--bg);
+  color: var(--text);
+}
+
+* {
+  border-color: var(--border);
+}
+
+.card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+}
+
+.input {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  color: var(--text);
+  width: 100%;
+}
+.input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 999px;
+}

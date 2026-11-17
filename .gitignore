@@ -7,9 +7,7 @@ dist/
 npm-debug.log*
 
 # local data (SQLite DB, generated reports, screenshots)
-data/
-reports/
-screenshots/
+/data/
 *.sqlite
 *.sqlite-journal
 *.sqlite-wal

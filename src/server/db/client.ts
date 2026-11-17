@@ -7,8 +7,11 @@ import * as schema from "./schema";
 const DATA_DIR = path.join(process.cwd(), "data");
 const DB_PATH = path.join(DATA_DIR, "audit-tool.sqlite");
 
-if (!existsSync(DATA_DIR)) {
-  mkdirSync(DATA_DIR, { recursive: true });
+// turbopackIgnore: these paths are statically scoped under ./data and only
+// ever touched at runtime (never during the build), but Turbopack's static
+// analysis can't tell that from a dynamic fs call — tell it not to trace here.
+if (!existsSync(/* turbopackIgnore: true */ DATA_DIR)) {
+  mkdirSync(/* turbopackIgnore: true */ DATA_DIR, { recursive: true });
 }
 
 declare global {
@@ -31,5 +34,5 @@ export const SCREENSHOTS_DIR = path.join(DATA_DIR, "screenshots");
 export const RAW_DIR = path.join(DATA_DIR, "raw");
 
 for (const dir of [REPORTS_DIR, SCREENSHOTS_DIR, RAW_DIR]) {
-  if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+  if (!existsSync(/* turbopackIgnore: true */ dir)) mkdirSync(/* turbopackIgnore: true */ dir, { recursive: true });
 }
