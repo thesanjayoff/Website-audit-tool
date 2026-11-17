@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Riverside Dental — main site — Website Audit Report</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  :root { --accent: #4f46e5; }
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; margin: 0; color: #171923; background: #fff; line-height: 1.5; }
+  .page { max-width: 880px; margin: 0 auto; padding: 32px 24px 80px; }
+  .cover { border-bottom: 4px solid var(--accent); padding-bottom: 24px; margin-bottom: 32px; }
+  .cover .brand { color: var(--accent); font-weight: 700; font-size: 14px; letter-spacing: 0.04em; text-transform: uppercase; }
+  .cover h1 { font-size: 28px; margin: 8px 0 4px; }
+  .cover .meta { color: #5b6475; font-size: 14px; }
+  h2 { border-bottom: 1px solid #e4e7ee; padding-bottom: 8px; margin-top: 40px; }
+  h3 { text-transform: capitalize; }
+  .scores { display: flex; gap: 16px; flex-wrap: wrap; margin: 16px 0; }
+  .score-card { border: 1px solid #e4e7ee; border-radius: 12px; padding: 16px 24px; text-align: center; min-width: 110px; }
+  .score-value { font-size: 32px; font-weight: 700; }
+  .score-label { color: #5b6475; font-size: 13px; margin-top: 4px; text-transform: capitalize; }
+  .finding { border: 1px solid #e4e7ee; border-radius: 10px; padding: 14px 16px; margin: 12px 0; }
+  .finding-header { display: flex; align-items: center; gap: 10px; }
+  .finding-header h4 { margin: 0; flex: 1; font-size: 15px; }
+  .pill { border: 1px solid; border-radius: 999px; padding: 2px 10px; font-size: 11px; text-transform: uppercase; font-weight: 600; }
+  .muted { color: #5b6475; font-size: 13px; }
+  .impact { background: #fafafa; padding: 8px 10px; border-radius: 6px; }
+  .fix { background: #f0f5ff; padding: 8px 10px; border-radius: 6px; }
+  .evidence { font-size: 13px; padding-left: 18px; }
+  .snippet { background: #f6f7fb; border: 1px solid #e4e7ee; padding: 6px 8px; border-radius: 6px; overflow-x: auto; font-size: 12px; white-space: pre-wrap; word-break: break-all; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 12px 0; }
+  th, td { border-bottom: 1px solid #e4e7ee; padding: 6px 8px; text-align: left; }
+  .ai-label { display: inline-block; margin-top: 8px; font-size: 11px; color: var(--accent); border: 1px solid var(--accent); border-radius: 999px; padding: 2px 8px; }
+  ul.simple { padding-left: 20px; }
+  .disclaimer { background: #fff7ed; border: 1px solid #fed7aa; border-radius: 8px; padding: 12px 16px; font-size: 13px; margin: 16px 0; }
+  @media print { .page { padding: 0; } }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="cover">
+    <div class="brand">Your Agency</div>
+    <h1>Riverside Dental — main site — Website Audit Report</h1>
+    <div class="meta">https://riverside-dental.demo.invalid · Audited 15/11/2026 · Report generated 17/11/2026</div>
+  </div>
+
+  <h2>Executive summary</h2>
+  <p>Riverside Dental — main site scored 74/100 overall, which is good, with some room to improve. This audit found 1 high-priority issue that are worth addressing soon. The area with the most room to improve right now is accessibility. The highest-value next steps are: missing content-security-policy header; form elements must have labels; hero image is not served in a modern format. See &quot;Top fixes&quot; below for details on each. This report blends automated measurements (performance labs, accessibility rule engines, security header/TLS checks, and SEO heuristics) with plain-English explanations of why each finding matters for the business. It is not a substitute for a human review of design, copy, or legal/compliance questions.</p>
+  
+
+  <div class="scores">
+    
+    <div class="score-card">
+      <div class="score-value" style="color:#d97706">74</div>
+      <div class="score-label">Overall</div>
+    </div>
+    
+    <div class="score-card">
+      <div class="score-value" style="color:#d97706">70</div>
+      <div class="score-label">Performance</div>
+    </div>
+    
+    <div class="score-card">
+      <div class="score-value" style="color:#d97706">80</div>
+      <div class="score-label">SEO</div>
+    </div>
+    
+    <div class="score-card">
+      <div class="score-value" style="color:#dc2626">68</div>
+      <div class="score-label">Accessibility</div>
+    </div>
+    
+    <div class="score-card">
+      <div class="score-value" style="color:#d97706">78</div>
+      <div class="score-label">Security</div>
+    </div>
+  </div>
+
+  
+  <h2>Since the last audit</h2>
+  <table>
+    <thead><tr><th>Category</th><th>Previous</th><th>Current</th><th>Change</th></tr></thead>
+    <tbody><tr><td>Overall</td><td>61</td><td>74</td><td style="color:#16a34a">+13</td></tr><tr><td>Performance</td><td>58</td><td>70</td><td style="color:#16a34a">+12</td></tr><tr><td>SEO</td><td>72</td><td>80</td><td style="color:#16a34a">+8</td></tr><tr><td>Accessibility</td><td>55</td><td>68</td><td style="color:#16a34a">+13</td></tr><tr><td>Security</td><td>60</td><td>78</td><td style="color:#16a34a">+18</td></tr></tbody>
+  </table>
+  <p class="muted">1 new finding(s), 0 resolved, 5 still open from before.</p>
+  
+
+  <h2>Top 5 fixes</h2>
+  <p class="muted">Sorted by impact vs. effort — the best return on time spent.</p>
+  
+    <div class="finding">
+      <div class="finding-header">
+        <span class="pill" style="background:#dc26261a;color:#dc2626;border-color:#dc262655">high</span>
+        <h4>Missing Content-Security-Policy header</h4>
+        <span class="muted">affects 2 pages</span>
+      </div>
+      <p>No Content-Security-Policy header was found on either page audited.</p>
+      <p class="impact"><strong>Why it matters:</strong> Without a CSP, the browser has no extra protection against injected scripts beyond the page&#39;s own code.</p>
+      <p class="fix"><strong>Suggested fix:</strong> Add a Content-Security-Policy header, starting in report-only mode to avoid breaking the site.</p>
+      <p class="muted">Effort: low · Impact: high · Engine: header-check</p>
+      <ul class="evidence">
+      <li>
+        <code>https://riverside-dental.demo.invalid/</code>
+        
+        
+        
+      </li></ul>
+    </div>
+    <div class="finding">
+      <div class="finding-header">
+        <span class="pill" style="background:#d977061a;color:#d97706;border-color:#d9770655">medium</span>
+        <h4>Form elements must have labels</h4>
+        <span class="muted">affects 1 page</span>
+      </div>
+      <p>The contact form&#39;s phone number field has no associated &lt;label&gt;, aria-label, or aria-labelledby.</p>
+      <p class="impact"><strong>Why it matters:</strong> Screen reader users may not understand what the field is for, which can mean a lost lead.</p>
+      <p class="fix"><strong>Suggested fix:</strong> Add &lt;label for=&quot;phone&quot;&gt;Phone number&lt;/label&gt; immediately before the field.</p>
+      <p class="muted">Effort: low · Impact: high · Engine: axe-core · WCAG: 4.1.2</p>
+      <ul class="evidence">
+      <li>
+        <code>https://riverside-dental.demo.invalid/contact</code>
+        <br/><span class="muted">selector: <code>#phone</code></span>
+        <pre class="snippet">&lt;input id=&quot;phone&quot; type=&quot;tel&quot;&gt;</pre>
+        
+      </li></ul>
+    </div>
+    <div class="finding">
+      <div class="finding-header">
+        <span class="pill" style="background:#d977061a;color:#d97706;border-color:#d9770655">medium</span>
+        <h4>Hero image is not served in a modern format</h4>
+        <span class="muted">affects 1 page</span>
+      </div>
+      <p>The homepage&#39;s hero image is a large PNG; converting it to WebP/AVIF would cut its size significantly.</p>
+      <p class="impact"><strong>Why it matters:</strong> Slower image loads push back Largest Contentful Paint, which can hurt both conversions and Core Web Vitals-linked search signals.</p>
+      <p class="fix"><strong>Suggested fix:</strong> Re-export the hero image as WebP (with a JPEG fallback) and serve it via &lt;picture&gt; or a modern image CDN.</p>
+      <p class="muted">Effort: low · Impact: medium · Engine: lighthouse</p>
+      <ul class="evidence">
+      <li>
+        <code>https://riverside-dental.demo.invalid/</code>
+        
+        
+        <br/><span class="muted">~340KB potential savings</span>
+      </li></ul>
+    </div>
+    <div class="finding">
+      <div class="finding-header">
+        <span class="pill" style="background:#d977061a;color:#d97706;border-color:#d9770655">medium</span>
+        <h4>Missing meta description</h4>
+        <span class="muted">affects 1 page</span>
+      </div>
+      <p>The contact page has no meta description, so search engines will auto-generate a snippet.</p>
+      <p class="impact"><strong>Why it matters:</strong> An auto-generated snippet is less persuasive than a written one and can hurt click-through from search results.</p>
+      <p class="fix"><strong>Suggested fix:</strong> Add a unique, ~150-character meta description summarizing what visitors can do on this page.</p>
+      <p class="muted">Effort: low · Impact: medium · Engine: seo-checks</p>
+      <ul class="evidence">
+      <li>
+        <code>https://riverside-dental.demo.invalid/contact</code>
+        
+        
+        
+      </li></ul>
+    </div>
+    <div class="finding">
+      <div class="finding-header">
+        <span class="pill" style="background:#2563eb1a;color:#2563eb;border-color:#2563eb55">low</span>
+        <h4>8 tap targets smaller than the recommended 24x24px minimum</h4>
+        <span class="muted">affects 1 page</span>
+      </div>
+      <p>Several footer links and icon buttons render below the recommended minimum touch target size on mobile.</p>
+      <p class="impact"><strong>Why it matters:</strong> Visitors on mobile may mis-tap small controls, which is a small but real conversion drag.</p>
+      <p class="fix"><strong>Suggested fix:</strong> Increase tap target size to at least 24x24 CSS pixels with adequate spacing.</p>
+      <p class="muted">Effort: low · Impact: medium · Engine: content-checks</p>
+      <ul class="evidence">
+      <li>
+        <code>https://riverside-dental.demo.invalid/</code>
+        
+        
+        
+      </li></ul>
+    </div>
+
+  <h2>Quick wins</h2>
+  <p class="muted">Low effort, meaningful impact.</p>
+  <ul class="simple"><li>Form elements must have labels <span class="muted">(1 page)</span></li><li>Missing Content-Security-Policy header <span class="muted">(2 pages)</span></li><li>Hero image is not served in a modern format <span class="muted">(1 page)</span></li><li>Missing meta description <span class="muted">(1 page)</span></li><li>8 tap targets smaller than the recommended 24x24px minimum <span class="muted">(1 page)</span></li></ul>
+
+  <h2>Next steps</h2>
+  <ul class="simple"><li>Fix the quick wins below first — they&#39;re low effort and meaningfully move the needle.</li><li>Form elements must have labels (affects 1 page)</li><li>Missing Content-Security-Policy header (affects 2 pages)</li><li>Hero image is not served in a modern format (affects 1 page)</li><li>Re-run this audit after making changes to confirm scores improved and nothing regressed.</li><li>Schedule recurring audits (weekly or monthly) so regressions and expiring certificates are caught automatically.</li></ul>
+
+  <h2>Technical appendix</h2>
+  <p class="muted">Every finding, grouped by category, with evidence and a suggested fix.</p>
+  <section class="category"><h3>performance (1)</h3>
+    <div class="finding">
+      <div class="finding-header">
+        <span class="pill" style="background:#d977061a;color:#d97706;border-color:#d9770655">medium</span>
+        <h4>Hero image is not served in a modern format</h4>
+        <span class="muted">affects 1 page</span>
+      </div>
+      <p>The homepage&#39;s hero image is a large PNG; converting it to WebP/AVIF would cut its size significantly.</p>
+      <p class="impact"><strong>Why it matters:</strong> Slower image loads push back Largest Contentful Paint, which can hurt both conversions and Core Web Vitals-linked search signals.</p>
+      <p class="fix"><strong>Suggested fix:</strong> Re-export the hero image as WebP (with a JPEG fallback) and serve it via &lt;picture&gt; or a modern image CDN.</p>
+      <p class="muted">Effort: low · Impact: medium · Engine: lighthouse</p>
+      <ul class="evidence">
+      <li>
+        <code>https://riverside-dental.demo.invalid/</code>
+        
+        
+        <br/><span class="muted">~340KB potential savings</span>
+      </li></ul>
+    </div></section><section class="category"><h3>seo (1)</h3>
+    <div class="finding">
+      <div class="finding-header">
+        <span class="pill" style="background:#d977061a;color:#d97706;border-color:#d9770655">medium</span>
+        <h4>Missing meta description</h4>
+        <span class="muted">affects 1 page</span>
+      </div>
+      <p>The contact page has no meta description, so search engines will auto-generate a snippet.</p>
+      <p class="impact"><strong>Why it matters:</strong> An auto-generated snippet is less persuasive than a written one and can hurt click-through from search results.</p>
+      <p class="fix"><strong>Suggested fix:</strong> Add a unique, ~150-character meta description summarizing what visitors can do on this page.</p>
+      <p class="muted">Effort: low · Impact: medium · Engine: seo-checks</p>
+      <ul class="evidence">
+      <li>
+        <code>https://riverside-dental.demo.invalid/contact</code>
+        
+        
+        
+      </li></ul>
+    </div></section><section class="category"><h3>accessibility (1)</h3>
+    <div class="finding">
+      <div class="finding-header">
+        <span class="pill" style="background:#d977061a;color:#d97706;border-color:#d9770655">medium</span>
+        <h4>Form elements must have labels</h4>
+        <span class="muted">affects 1 page</span>
+      </div>
+      <p>The contact form&#39;s phone number field has no associated &lt;label&gt;, aria-label, or aria-labelledby.</p>
+      <p class="impact"><strong>Why it matters:</strong> Screen reader users may not understand what the field is for, which can mean a lost lead.</p>
+      <p class="fix"><strong>Suggested fix:</strong> Add &lt;label for=&quot;phone&quot;&gt;Phone number&lt;/label&gt; immediately before the field.</p>
+      <p class="muted">Effort: low · Impact: high · Engine: axe-core · WCAG: 4.1.2</p>
+      <ul class="evidence">
+      <li>
+        <code>https://riverside-dental.demo.invalid/contact</code>
+        <br/><span class="muted">selector: <code>#phone</code></span>
+        <pre class="snippet">&lt;input id=&quot;phone&quot; type=&quot;tel&quot;&gt;</pre>
+        
+      </li></ul>
+    </div></section><section class="category"><h3>security (2)</h3>
+    <div class="finding">
+      <div class="finding-header">
+        <span class="pill" style="background:#dc26261a;color:#dc2626;border-color:#dc262655">high</span>
+        <h4>Missing Content-Security-Policy header</h4>
+        <span class="muted">affects 2 pages</span>
+      </div>
+      <p>No Content-Security-Policy header was found on either page audited.</p>
+      <p class="impact"><strong>Why it matters:</strong> Without a CSP, the browser has no extra protection against injected scripts beyond the page&#39;s own code.</p>
+      <p class="fix"><strong>Suggested fix:</strong> Add a Content-Security-Policy header, starting in report-only mode to avoid breaking the site.</p>
+      <p class="muted">Effort: low · Impact: high · Engine: header-check</p>
+      <ul class="evidence">
+      <li>
+        <code>https://riverside-dental.demo.invalid/</code>
+        
+        
+        
+      </li></ul>
+    </div>
+    <div class="finding">
+      <div class="finding-header">
+        <span class="pill" style="background:#2563eb1a;color:#2563eb;border-color:#2563eb55">low</span>
+        <h4>No clickjacking protection (X-Frame-Options or frame-ancestors)</h4>
+        <span class="muted">affects 1 page</span>
+      </div>
+      <p>This was present in the previous audit and has since been fixed — kept here, marked fixed, to show the history view.</p>
+      <p class="impact"><strong>Why it matters:</strong> Resolved: the site now sets frame-ancestors via its CSP.</p>
+      <p class="fix"><strong>Suggested fix:</strong> Already fixed.</p>
+      <p class="muted">Effort: low · Impact: medium · Engine: header-check</p>
+      <ul class="evidence">
+      <li>
+        <code>https://riverside-dental.demo.invalid/</code>
+        
+        
+        
+      </li></ul>
+    </div></section><section class="category"><h3>content (1)</h3>
+    <div class="finding">
+      <div class="finding-header">
+        <span class="pill" style="background:#2563eb1a;color:#2563eb;border-color:#2563eb55">low</span>
+        <h4>8 tap targets smaller than the recommended 24x24px minimum</h4>
+        <span class="muted">affects 1 page</span>
+      </div>
+      <p>Several footer links and icon buttons render below the recommended minimum touch target size on mobile.</p>
+      <p class="impact"><strong>Why it matters:</strong> Visitors on mobile may mis-tap small controls, which is a small but real conversion drag.</p>
+      <p class="fix"><strong>Suggested fix:</strong> Increase tap target size to at least 24x24 CSS pixels with adequate spacing.</p>
+      <p class="muted">Effort: low · Impact: medium · Engine: content-checks</p>
+      <ul class="evidence">
+      <li>
+        <code>https://riverside-dental.demo.invalid/</code>
+        
+        
+        
+      </li></ul>
+    </div></section>
+
+  <h2>Pages audited</h2>
+  <table>
+    <thead><tr><th>URL</th><th>Type</th><th>Device</th><th>Loaded</th><th>Perf</th><th>LCP</th><th>CLS</th><th>TBT (INP proxy)</th></tr></thead>
+    <tbody>
+    <tr>
+      <td>https://riverside-dental.demo.invalid/</td>
+      <td>home</td>
+      <td>desktop</td>
+      <td>OK</td>
+      <td>70</td>
+      <td>2300ms (good)</td>
+      <td>0.060</td>
+      <td>180ms</td>
+    </tr>
+    <tr>
+      <td>https://riverside-dental.demo.invalid/contact</td>
+      <td>contact</td>
+      <td>desktop</td>
+      <td>OK</td>
+      <td>66</td>
+      <td>2300ms (good)</td>
+      <td>0.060</td>
+      <td>180ms</td>
+    </tr></tbody>
+  </table>
+
+  <h2>Methodology &amp; limitations</h2>
+  <div class="disclaimer">
+    <strong>This is not a penetration test, a full vulnerability assessment, or an accessibility compliance certification.</strong>
+    It combines automated lab measurements and rule-based checks with plain-English explanations. Automated accessibility tools
+    only catch roughly 30-50% of real WCAG issues — see the manual checklist below.
+  </div>
+  <ul class="simple">
+    <li>Lighthouse 13.6.0 — performance/SEO/best-practices lab scores, median of multiple runs per page.</li>
+    <li>axe-core 4.14.1 and HTML CodeSniffer via Pa11y 10.0.0 — automated WCAG 2.0/2.1/2.2 A/AA checks.</li>
+    <li>Core Web Vitals lab thresholds: LCP good ≤ 2500ms, CLS good ≤ 0.1, INP good ≤ 200ms (Lighthouse cannot measure INP directly in the lab; Total Blocking Time is shown as a labelled proxy).</li>
+    <li>Overall score = weighted average of Performance (30%), SEO (25%), Accessibility (25%), Security (20%). Full formula and weights are documented in the tool's source (src/server/config/scoring.ts) and are adjustable.</li>
+    <li>Accessibility results combine axe-core and HTML CodeSniffer (via Pa11y) automated rule checks against WCAG 2.0/2.1/2.2 A and AA, plus a handful of extra heuristic checks (lang attribute, heading order, skip links, form labels, vague link text, focus-outline suppression). Automated tools are estimated to catch roughly 30-50% of real WCAG failures. They cannot assess whether content actually makes sense to a screen reader user, whether custom widgets behave correctly with assistive tech, or many other judgment-based criteria. This report is not a substitute for manual testing and must never be used to claim a site is &quot;WCAG compliant&quot; or &quot;ADA compliant&quot; — only that these specific automated checks passed or failed.</li>
+    <li>When enabled, the optional AI layer only rewrites the wording of the executive summary and finding explanations for a non-technical audience. It is given only computed scores and finding titles/severities/business impact — never raw page content, headers, or cookies — and cannot change any score or add/remove findings. AI-written text is labelled below and can always be edited.</li>
+  </ul>
+  <h3>Manual accessibility checklist (not automatable)</h3>
+  <ul class="simple"><li>Navigate the entire page using only the keyboard (Tab, Shift+Tab, Enter, Space, arrow keys) — can you reach and operate everything?</li><li>Run through the key user flows with a screen reader (NVDA/JAWS on Windows, VoiceOver on Mac/iOS, TalkBack on Android).</li><li>Zoom the page to 200% and reflow at a narrow viewport — does content remain usable without horizontal scrolling or overlap?</li><li>Check that any video has accurate captions and any audio-only content has a transcript.</li><li>Verify color is never the only way information is conveyed (e.g. error states, required fields, chart legends).</li><li>Test forms end-to-end for clear error messages that are announced to assistive technology.</li></ul>
+
+  <p class="muted">Findings referenced in this report: 6 total (5 open).</p>
+</div>
+</body>
+</html>
