@@ -65,7 +65,7 @@ export type LighthouseDiagnostics = {
   layoutShiftCulprits: string[];
 };
 
-function median(values: number[]): number | null {
+export function median(values: number[]): number | null {
   const clean = values.filter((v) => typeof v === "number" && !Number.isNaN(v));
   if (clean.length === 0) return null;
   const sorted = [...clean].sort((a, b) => a - b);
