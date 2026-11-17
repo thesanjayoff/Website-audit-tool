@@ -28,7 +28,7 @@ async function waitForJob(jobKey: string, timeoutMs: number): Promise<string | n
   return null;
 }
 
-async function runDueSchedules() {
+export async function runDueSchedules() {
   const now = new Date().toISOString();
   const due = await db.select().from(schedules).where(lte(schedules.nextRunAt, now));
 
