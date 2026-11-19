@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ScanSearch } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
+import { Button } from "@/components/ui/button";
 
 export function NavBar() {
   return (
@@ -10,9 +11,13 @@ export function NavBar() {
           <ScanSearch size={20} className="text-[var(--accent)]" />
           <span>Website Audit Tool</span>
         </Link>
-        <nav className="flex items-center gap-4 text-sm text-[var(--text-muted)]">
-          <Link href="/" className="hover:text-[var(--text)]">Dashboard</Link>
-          <Link href="/settings" className="hover:text-[var(--text)]">Settings</Link>
+        <nav className="flex items-center gap-1 text-sm">
+          <Button variant="ghost" size="sm" render={<Link href="/" />}>
+            Dashboard
+          </Button>
+          <Button variant="ghost" size="sm" render={<Link href="/settings" />}>
+            Settings
+          </Button>
           <ThemeToggle />
         </nav>
       </div>

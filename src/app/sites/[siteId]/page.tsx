@@ -11,6 +11,10 @@ import { ScoreRing } from "@/components/ui/ScoreRing";
 import { Badge } from "@/components/ui/Badge";
 import { TrendChart, type TrendPoint } from "@/components/TrendChart";
 import { ScheduleManager } from "@/components/ScheduleManager";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 export const dynamic = "force-dynamic";
 
@@ -44,6 +48,8 @@ export default async function SiteDetailPage({ params }: { params: Promise<{ sit
   );
   const [latestMain] = auditHistory;
 
+  const unacknowledgedAlerts = siteAlerts.filter((a) => !a.acknowledged);
+
   return (
     <div className="flex flex-col gap-8">
       <div>
@@ -53,22 +59,24 @@ export default async function SiteDetailPage({ params }: { params: Promise<{ sit
             <h1 className="text-2xl font-semibold">{site.label}</h1>
             <p className="text-sm text-[var(--text-muted)]">{site.baseUrl}</p>
           </div>
-          <Link href={`/new-audit?siteId=${site.id}`} className="flex items-center gap-2 rounded-lg bg-[var(--accent)] px-4 py-2 text-sm font-medium text-[var(--accent-contrast)]">
+          <Button render={<Link href={`/new-audit?siteId=${site.id}`} />}>
             <RefreshCw size={14} /> Re-audit
-          </Link>
+          </Button>
         </div>
       </div>
 
-      {siteAlerts.filter((a) => !a.acknowledged).length > 0 && (
-        <div className="card flex flex-col gap-2 border-amber-500/40 p-4">
-          <h2 className="font-medium text-amber-600 dark:text-amber-300">Alerts</h2>
-          {siteAlerts.filter((a) => !a.acknowledged).map((a) => (
-            <p key={a.id} className="text-sm text-[var(--text-muted)]">{a.message}</p>
-          ))}
-        </div>
+      {unacknowledgedAlerts.length > 0 && (
+        <Alert className="border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300">
+          <AlertTitle>Alerts</AlertTitle>
+          <AlertDescription className="flex flex-col gap-1 text-current">
+            {unacknowledgedAlerts.map((a) => (
+              <span key={a.id}>{a.message}</span>
+            ))}
+          </AlertDescription>
+        </Alert>
       )}
 
-      <section className="card p-6">
+      <Card className="p-6">
         <h2 className="mb-3 font-medium">Latest scores</h2>
         {latestMain ? (
           <div className="flex flex-wrap gap-6">
@@ -81,74 +89,86 @@ export default async function SiteDetailPage({ params }: { params: Promise<{ sit
         ) : (
           <p className="text-sm text-[var(--text-muted)]">No completed audits yet.</p>
         )}
-      </section>
+      </Card>
 
-      <section className="card p-6">
+      <Card className="p-6">
         <h2 className="mb-3 font-medium">Trend</h2>
         <TrendChart data={trend} />
-      </section>
+      </Card>
 
-      <section className="card p-6">
+      <Card className="p-6">
         <h2 className="mb-3 font-medium">Audit history</h2>
-        <table className="w-full text-sm">
-          <thead className="text-left text-[var(--text-muted)]">
-            <tr><th className="pb-2">Date</th><th className="pb-2">Status</th><th className="pb-2">Overall</th><th className="pb-2"></th></tr>
-          </thead>
-          <tbody>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Date</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Overall</TableHead>
+              <TableHead></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {auditHistory.map((a) => (
-              <tr key={a.id} className="border-t border-[var(--border)]">
-                <td className="py-2">{new Date(a.startedAt).toLocaleString()}</td>
-                <td className="py-2"><Badge tone={a.status === "done" ? "fixed" : a.status === "failed" ? "high" : "open"}>{a.status}</Badge></td>
-                <td className="py-2">{a.overallScore != null ? Math.round(a.overallScore) : "—"}</td>
-                <td className="py-2 text-right"><Link href={`/audits/${a.id}`} className="text-[var(--accent)] hover:underline">View report</Link></td>
-              </tr>
+              <TableRow key={a.id}>
+                <TableCell>{new Date(a.startedAt).toLocaleString()}</TableCell>
+                <TableCell><Badge tone={a.status === "done" ? "fixed" : a.status === "failed" ? "high" : "open"}>{a.status}</Badge></TableCell>
+                <TableCell>{a.overallScore != null ? Math.round(a.overallScore) : "—"}</TableCell>
+                <TableCell className="text-right"><Link href={`/audits/${a.id}`} className="text-[var(--accent)] hover:underline">View report</Link></TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
-      </section>
+          </TableBody>
+        </Table>
+      </Card>
 
-      <section className="card p-6">
+      <Card className="p-6">
         <h2 className="mb-3 font-medium">Scheduled re-audits</h2>
         <ScheduleManager siteId={site.id} initialSchedules={siteSchedules} />
-      </section>
+      </Card>
 
-      <section className="card p-6">
+      <Card className="p-6">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="flex items-center gap-2 font-medium"><Users size={16} /> Competitor comparison</h2>
-          <Link href={`/new-audit?competitorOf=${site.id}`} className="flex items-center gap-1 text-sm text-[var(--accent)] hover:underline">
+          <Button variant="link" size="sm" className="h-auto p-0" render={<Link href={`/new-audit?competitorOf=${site.id}`} />}>
             <Plus size={14} /> Add competitor
-          </Link>
+          </Button>
         </div>
         {competitorLatest.length === 0 ? (
           <p className="text-sm text-[var(--text-muted)]">Add up to 3 competitor sites to compare scores side by side.</p>
         ) : (
-          <table className="w-full text-sm">
-            <thead className="text-left text-[var(--text-muted)]">
-              <tr><th className="pb-2">Site</th><th className="pb-2">Overall</th><th className="pb-2">Perf</th><th className="pb-2">SEO</th><th className="pb-2">A11y</th><th className="pb-2">Security</th></tr>
-            </thead>
-            <tbody>
-              <tr className="border-t border-[var(--border)] font-medium">
-                <td className="py-2">{site.label} (you)</td>
-                <td className="py-2">{latestMain?.overallScore != null ? Math.round(latestMain.overallScore) : "—"}</td>
-                <td className="py-2">{latestMain?.performanceScore != null ? Math.round(latestMain.performanceScore) : "—"}</td>
-                <td className="py-2">{latestMain?.seoScore != null ? Math.round(latestMain.seoScore) : "—"}</td>
-                <td className="py-2">{latestMain?.accessibilityScore != null ? Math.round(latestMain.accessibilityScore) : "—"}</td>
-                <td className="py-2">{latestMain?.securityScore != null ? Math.round(latestMain.securityScore) : "—"}</td>
-              </tr>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Site</TableHead>
+                <TableHead>Overall</TableHead>
+                <TableHead>Perf</TableHead>
+                <TableHead>SEO</TableHead>
+                <TableHead>A11y</TableHead>
+                <TableHead>Security</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow className="font-medium">
+                <TableCell>{site.label} (you)</TableCell>
+                <TableCell>{latestMain?.overallScore != null ? Math.round(latestMain.overallScore) : "—"}</TableCell>
+                <TableCell>{latestMain?.performanceScore != null ? Math.round(latestMain.performanceScore) : "—"}</TableCell>
+                <TableCell>{latestMain?.seoScore != null ? Math.round(latestMain.seoScore) : "—"}</TableCell>
+                <TableCell>{latestMain?.accessibilityScore != null ? Math.round(latestMain.accessibilityScore) : "—"}</TableCell>
+                <TableCell>{latestMain?.securityScore != null ? Math.round(latestMain.securityScore) : "—"}</TableCell>
+              </TableRow>
               {competitorLatest.map(({ site: c, latestAudit }) => (
-                <tr key={c.id} className="border-t border-[var(--border)]">
-                  <td className="py-2">{c.label}</td>
-                  <td className="py-2">{latestAudit?.overallScore != null ? Math.round(latestAudit.overallScore) : "—"}</td>
-                  <td className="py-2">{latestAudit?.performanceScore != null ? Math.round(latestAudit.performanceScore) : "—"}</td>
-                  <td className="py-2">{latestAudit?.seoScore != null ? Math.round(latestAudit.seoScore) : "—"}</td>
-                  <td className="py-2">{latestAudit?.accessibilityScore != null ? Math.round(latestAudit.accessibilityScore) : "—"}</td>
-                  <td className="py-2">{latestAudit?.securityScore != null ? Math.round(latestAudit.securityScore) : "—"}</td>
-                </tr>
+                <TableRow key={c.id}>
+                  <TableCell>{c.label}</TableCell>
+                  <TableCell>{latestAudit?.overallScore != null ? Math.round(latestAudit.overallScore) : "—"}</TableCell>
+                  <TableCell>{latestAudit?.performanceScore != null ? Math.round(latestAudit.performanceScore) : "—"}</TableCell>
+                  <TableCell>{latestAudit?.seoScore != null ? Math.round(latestAudit.seoScore) : "—"}</TableCell>
+                  <TableCell>{latestAudit?.accessibilityScore != null ? Math.round(latestAudit.accessibilityScore) : "—"}</TableCell>
+                  <TableCell>{latestAudit?.securityScore != null ? Math.round(latestAudit.securityScore) : "—"}</TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         )}
-      </section>
+      </Card>
     </div>
   );
 }

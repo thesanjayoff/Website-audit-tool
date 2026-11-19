@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Loader2, CheckCircle2, XCircle } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function AuditProgressPage() {
   const { jobKey } = useParams<{ jobKey: string }>();
@@ -55,14 +57,19 @@ export default function AuditProgressPage() {
           {status === "running" ? "Running audit…" : status === "done" ? "Audit complete" : "Audit failed"}
         </h1>
       </div>
-      {errorMsg && <p className="text-sm text-[var(--bad)]">{errorMsg}</p>}
-      <div ref={logRef} className="card scrollbar-thin h-96 overflow-y-auto p-4 font-mono text-xs text-[var(--text-muted)]">
+      {errorMsg && (
+        <Alert variant="destructive">
+          <XCircle />
+          <AlertDescription className="text-current">{errorMsg}</AlertDescription>
+        </Alert>
+      )}
+      <Card ref={logRef} className="scrollbar-thin h-96 overflow-y-auto p-4 font-mono text-xs text-[var(--text-muted)]">
         {lines.length === 0 ? (
           <p>Starting up the browser and crawler…</p>
         ) : (
           lines.map((line, i) => <div key={i}>{line}</div>)
         )}
-      </div>
+      </Card>
     </div>
   );
 }

@@ -187,9 +187,20 @@ src/server/reports/     # HTML/PDF/CSV/Markdown/GitHub-issue export + escaping
 src/server/security/    # SSRF protection
 src/server/db/          # Drizzle schema, migrations, seed script
 src/app/                # Next.js App Router pages + API routes
+src/components/ui/      # shadcn/ui primitives (Base UI + Tailwind), generated via `npx shadcn add`
 test/fixtures/          # local good/bad test sites + static server
 test/unit/              # vitest suite
 ```
+
+### UI stack
+
+The frontend is Tailwind CSS 4 plus [shadcn/ui](https://ui.shadcn.com) components
+(built on [Base UI](https://base-ui.com), not Radix — shadcn's newer default).
+Brand colors live as CSS variables in `src/app/globals.css`; shadcn's own
+`--primary`/`--ring` tokens are aliased to the same brand `--accent` variable
+so generated components stay on-brand automatically in both themes. Dark mode
+toggles the standard `.dark` class on `<html>` via `next-themes`. To add another
+component: `npx shadcn@latest add <name>`.
 
 ## References and prior art
 

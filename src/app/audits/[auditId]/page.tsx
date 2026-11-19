@@ -1,12 +1,30 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Download, FileText, FileSpreadsheet, FileJson, ArrowLeft } from "lucide-react";
+import { Download, FileText, FileSpreadsheet, FileJson, FileCode, ArrowLeft, ChevronDown, TriangleAlert } from "lucide-react";
 import { buildReportData } from "@/server/reports/buildReportData";
 import { ScoreRing } from "@/components/ui/ScoreRing";
 import { Badge } from "@/components/ui/Badge";
 import { FindingCard } from "@/components/FindingCard";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 export const dynamic = "force-dynamic";
+
+const EXPORT_FORMATS = [
+  { format: "html", label: "HTML report", icon: <FileText size={14} /> },
+  { format: "pdf", label: "PDF", icon: <Download size={14} /> },
+  { format: "csv", label: "CSV", icon: <FileSpreadsheet size={14} /> },
+  { format: "json", label: "JSON", icon: <FileJson size={14} /> },
+  { format: "markdown", label: "Markdown", icon: <FileCode size={14} /> },
+] as const;
 
 export default async function AuditDetailPage({ params }: { params: Promise<{ auditId: string }> }) {
   const { auditId } = await params;
@@ -17,10 +35,10 @@ export default async function AuditDetailPage({ params }: { params: Promise<{ au
 
   if (audit.status !== "done") {
     return (
-      <div className="card p-8 text-center">
+      <Card className="p-8 text-center">
         <p className="text-lg font-medium capitalize">Audit is {audit.status}</p>
         {audit.error && <p className="mt-2 text-sm text-[var(--bad)]">{audit.error}</p>}
-      </div>
+      </Card>
     );
   }
 
@@ -34,15 +52,24 @@ export default async function AuditDetailPage({ params }: { params: Promise<{ au
           <h1 className="mt-1 text-2xl font-semibold">{site.label} — audit report</h1>
           <p className="text-sm text-[var(--text-muted)]">{site.baseUrl} · {new Date(audit.startedAt).toLocaleString()}</p>
         </div>
-        <div className="flex gap-2">
-          <ExportLink auditId={auditId} format="html" icon={<FileText size={14} />} label="HTML" />
-          <ExportLink auditId={auditId} format="pdf" icon={<Download size={14} />} label="PDF" />
-          <ExportLink auditId={auditId} format="csv" icon={<FileSpreadsheet size={14} />} label="CSV" />
-          <ExportLink auditId={auditId} format="json" icon={<FileJson size={14} />} label="JSON" />
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger render={<Button variant="outline" />}>
+            <Download size={14} /> Export <ChevronDown size={14} />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {EXPORT_FORMATS.map((f) => (
+              <DropdownMenuItem
+                key={f.format}
+                render={<a href={`/api/audits/${auditId}/export?format=${f.format}`} />}
+              >
+                {f.icon} {f.label}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
-      <section className="card p-6">
+      <Card className="p-6">
         <h2 className="mb-2 font-medium">Executive summary</h2>
         <p className="text-sm text-[var(--text-muted)]">{executiveSummary.text}</p>
         {executiveSummary.aiGenerated && <Badge tone="low" className="mt-2">AI-assisted wording — editable</Badge>}
@@ -53,32 +80,37 @@ export default async function AuditDetailPage({ params }: { params: Promise<{ au
           <ScoreRing score={audit.accessibilityScore} label="Accessibility" />
           <ScoreRing score={audit.securityScore} label="Security" />
         </div>
-      </section>
+      </Card>
 
       {data.previousAudit && (
-        <section className="card p-6">
+        <Card className="p-6">
           <h2 className="mb-3 font-medium">Since the last audit</h2>
-          <table className="w-full text-sm">
-            <thead className="text-left text-[var(--text-muted)]">
-              <tr><th className="pb-2">Category</th><th className="pb-2">Previous</th><th className="pb-2">Current</th><th className="pb-2">Change</th></tr>
-            </thead>
-            <tbody>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Category</TableHead>
+                <TableHead>Previous</TableHead>
+                <TableHead>Current</TableHead>
+                <TableHead>Change</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {scoreDeltas.map((d) => (
-                <tr key={d.category} className="border-t border-[var(--border)]">
-                  <td className="py-1.5">{d.category}</td>
-                  <td className="py-1.5">{d.previous != null ? Math.round(d.previous) : "—"}</td>
-                  <td className="py-1.5">{d.current != null ? Math.round(d.current) : "—"}</td>
-                  <td className={`py-1.5 ${d.delta != null && d.delta < 0 ? "text-[var(--bad)]" : "text-[var(--good)]"}`}>
+                <TableRow key={d.category}>
+                  <TableCell className="capitalize">{d.category}</TableCell>
+                  <TableCell>{d.previous != null ? Math.round(d.previous) : "—"}</TableCell>
+                  <TableCell>{d.current != null ? Math.round(d.current) : "—"}</TableCell>
+                  <TableCell className={d.delta != null && d.delta < 0 ? "text-[var(--bad)]" : "text-[var(--good)]"}>
                     {d.delta == null ? "—" : `${d.delta > 0 ? "+" : ""}${d.delta}`}
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
           <p className="mt-3 text-xs text-[var(--text-muted)]">
             {findingsDiff.newFindings.length} new · {findingsDiff.resolvedFindings.length} resolved · {findingsDiff.persistingFindings.length} still open
           </p>
-        </section>
+        </Card>
       )}
 
       <section>
@@ -90,14 +122,16 @@ export default async function AuditDetailPage({ params }: { params: Promise<{ au
 
       <section>
         <h2 className="mb-3 text-lg font-medium">Quick wins</h2>
-        <ul className="card flex flex-col gap-2 p-4 text-sm">
-          {quickWins.length === 0 ? <li className="text-[var(--text-muted)]">None identified this round.</li> : quickWins.map((f) => (
-            <li key={f.id} className="flex items-center justify-between border-b border-[var(--border)] pb-2 last:border-b-0 last:pb-0">
-              <span>{f.title}</span>
-              <span className="text-xs text-[var(--text-muted)]">{f.affectedPageIds.length} page(s)</span>
-            </li>
-          ))}
-        </ul>
+        <Card>
+          <CardContent className="flex flex-col gap-2">
+            {quickWins.length === 0 ? <p className="text-sm text-[var(--text-muted)]">None identified this round.</p> : quickWins.map((f) => (
+              <div key={f.id} className="flex items-center justify-between border-b border-[var(--border)] pb-2 text-sm last:border-b-0 last:pb-0">
+                <span>{f.title}</span>
+                <span className="text-xs text-[var(--text-muted)]">{f.affectedPageIds.length} page(s)</span>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
       </section>
 
       {(["performance", "seo", "accessibility", "security", "content"] as const).map((cat) => {
@@ -115,37 +149,46 @@ export default async function AuditDetailPage({ params }: { params: Promise<{ au
 
       <section>
         <h2 className="mb-3 text-lg font-medium">Pages audited</h2>
-        <div className="card scrollbar-thin overflow-x-auto p-2">
-          <table className="w-full text-sm">
-            <thead className="text-left text-[var(--text-muted)]">
-              <tr>
-                <th className="p-2">URL</th><th className="p-2">Type</th><th className="p-2">Device</th><th className="p-2">Loaded</th>
-                <th className="p-2">Perf</th><th className="p-2">LCP</th><th className="p-2">CLS</th><th className="p-2">TBT</th>
-              </tr>
-            </thead>
-            <tbody>
+        <Card className="scrollbar-thin overflow-x-auto p-2">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>URL</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Device</TableHead>
+                <TableHead>Loaded</TableHead>
+                <TableHead>Perf</TableHead>
+                <TableHead>LCP</TableHead>
+                <TableHead>CLS</TableHead>
+                <TableHead>TBT</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {pages.map((p) => (
-                <tr key={p.id} className="border-t border-[var(--border)]">
-                  <td className="max-w-[260px] truncate p-2"><a href={p.url} target="_blank" rel="noreferrer" className="hover:underline">{p.url}</a></td>
-                  <td className="p-2 capitalize">{p.pageType}</td>
-                  <td className="p-2 capitalize">{p.device}</td>
-                  <td className="p-2">{p.loadOk ? <span className="text-[var(--good)]">OK</span> : <span className="text-[var(--bad)]">{p.loadError}</span>}</td>
-                  <td className="p-2">{p.metrics?.lab.lighthousePerformanceScore != null ? Math.round(p.metrics.lab.lighthousePerformanceScore) : "—"}</td>
-                  <td className="p-2">{p.metrics?.lab.lcpMs != null ? `${Math.round(p.metrics.lab.lcpMs)}ms` : "—"}</td>
-                  <td className="p-2">{p.metrics?.lab.clsScore != null ? p.metrics.lab.clsScore.toFixed(3) : "—"}</td>
-                  <td className="p-2">{p.metrics?.lab.tbtMs != null ? `${Math.round(p.metrics.lab.tbtMs)}ms` : "—"}</td>
-                </tr>
+                <TableRow key={p.id}>
+                  <TableCell className="max-w-[260px] truncate"><a href={p.url} target="_blank" rel="noreferrer" className="hover:underline">{p.url}</a></TableCell>
+                  <TableCell className="capitalize">{p.pageType}</TableCell>
+                  <TableCell className="capitalize">{p.device}</TableCell>
+                  <TableCell>{p.loadOk ? <span className="text-[var(--good)]">OK</span> : <span className="text-[var(--bad)]">{p.loadError}</span>}</TableCell>
+                  <TableCell>{p.metrics?.lab.lighthousePerformanceScore != null ? Math.round(p.metrics.lab.lighthousePerformanceScore) : "—"}</TableCell>
+                  <TableCell>{p.metrics?.lab.lcpMs != null ? `${Math.round(p.metrics.lab.lcpMs)}ms` : "—"}</TableCell>
+                  <TableCell>{p.metrics?.lab.clsScore != null ? p.metrics.lab.clsScore.toFixed(3) : "—"}</TableCell>
+                  <TableCell>{p.metrics?.lab.tbtMs != null ? `${Math.round(p.metrics.lab.tbtMs)}ms` : "—"}</TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
-        </div>
+            </TableBody>
+          </Table>
+        </Card>
       </section>
 
-      <section className="card p-6 text-sm text-[var(--text-muted)]">
+      <Card className="p-6 text-sm text-[var(--text-muted)]">
         <h2 className="mb-2 font-medium text-[var(--text)]">Methodology &amp; limitations</h2>
-        <p className="mb-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-amber-700 dark:text-amber-300">
-          This is not a penetration test, a full vulnerability assessment, or an accessibility compliance certification.
-        </p>
+        <Alert variant="destructive" className="mb-2">
+          <TriangleAlert />
+          <AlertDescription className="text-current">
+            This is not a penetration test, a full vulnerability assessment, or an accessibility compliance certification.
+          </AlertDescription>
+        </Alert>
         <ul className="flex flex-col gap-1.5 pl-4 list-disc">
           <li>Lighthouse {methodology.lighthouseVersion ?? "unknown"} — median of multiple runs per page.</li>
           <li>axe-core {methodology.axeCoreVersion ?? "unknown"} + HTML CodeSniffer via Pa11y {methodology.pa11yVersion ?? "unknown"}.</li>
@@ -156,18 +199,7 @@ export default async function AuditDetailPage({ params }: { params: Promise<{ au
         <ul className="flex flex-col gap-1 pl-4 list-disc">
           {methodology.manualAccessibilityChecklist.map((c) => <li key={c}>{c}</li>)}
         </ul>
-      </section>
+      </Card>
     </div>
-  );
-}
-
-function ExportLink({ auditId, format, icon, label }: { auditId: string; format: string; icon: React.ReactNode; label: string }) {
-  return (
-    <a
-      href={`/api/audits/${auditId}/export?format=${format}`}
-      className="flex items-center gap-1.5 rounded-lg border border-[var(--border)] px-3 py-1.5 text-xs hover:border-[var(--accent)] hover:text-[var(--accent)]"
-    >
-      {icon} {label}
-    </a>
   );
 }

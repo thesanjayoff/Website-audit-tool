@@ -2,8 +2,15 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, ShieldCheck, Globe, ListChecks, Settings2, AlertTriangle } from "lucide-react";
+import { Loader2, ShieldCheck, Globe, ListChecks, Settings2, AlertTriangle, Check } from "lucide-react";
 import type { DiscoveredPage } from "@/server/crawler/crawl";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 type Project = { id: string; name: string };
 type ExistingSite = { id: string; baseUrl: string; label: string; projectId: string };
@@ -174,76 +181,80 @@ export function NewAuditWizard({
       </ol>
 
       {error && (
-        <div className="card flex items-center gap-2 border-[var(--bad)]/40 p-3 text-sm text-[var(--bad)]">
-          <AlertTriangle size={16} /> {error}
-        </div>
+        <Alert variant="destructive">
+          <AlertTriangle />
+          <AlertDescription className="text-current">{error}</AlertDescription>
+        </Alert>
       )}
 
       {step === 0 && (
-        <div className="card flex flex-col gap-4 p-6">
+        <Card className="p-6">
           <h2 className="flex items-center gap-2 font-medium"><Globe size={18} /> Site details</h2>
           <Field label="Project">
-            <select className="input" value={projectId} onChange={(e) => setProjectId(e.target.value)}>
-              <option value="">— create new project —</option>
-              {projects.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-            </select>
+            <Select value={projectId} onValueChange={(v) => setProjectId(v ?? "")}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="— create new project —" />
+              </SelectTrigger>
+              <SelectContent>
+                {projects.map((p) => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+              </SelectContent>
+            </Select>
           </Field>
           {!projectId && (
             <Field label="New project name">
-              <input className="input" value={newProjectName} onChange={(e) => setNewProjectName(e.target.value)} placeholder="Acme Corp" />
+              <Input value={newProjectName} onChange={(e) => setNewProjectName(e.target.value)} placeholder="Acme Corp" />
             </Field>
           )}
           <Field label="Site URL">
-            <input className="input" value={baseUrl} onChange={(e) => setBaseUrl(e.target.value)} placeholder="https://example.com" />
+            <Input value={baseUrl} onChange={(e) => setBaseUrl(e.target.value)} placeholder="https://example.com" />
           </Field>
           <Field label="Label (optional)">
-            <input className="input" value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Acme Corp — production site" />
+            <Input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Acme Corp — production site" />
           </Field>
           <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" checked={isLocalBusiness} onChange={(e) => setIsLocalBusiness(e.target.checked)} />
+            <Checkbox checked={isLocalBusiness} onCheckedChange={(v) => setIsLocalBusiness(v === true)} />
             This is a local business (enables NAP/local SEO checks)
           </label>
           <WizardFooter onNext={() => setStep(1)} nextDisabled={!baseUrl.startsWith("http") || (!projectId && !newProjectName.trim())} />
-        </div>
+        </Card>
       )}
 
       {step === 1 && (
-        <div className="card flex flex-col gap-4 p-6">
+        <Card className="p-6">
           <h2 className="flex items-center gap-2 font-medium"><ShieldCheck size={18} /> Permission to audit</h2>
           <p className="text-sm text-[var(--text-muted)]">
             This tool only runs passive checks (no login attempts, no vulnerability probing, no fuzzing), respects robots.txt, and uses polite
             rate limits. You still must confirm you have the right to test this site — this is recorded in the audit log.
           </p>
           <Field label="Your name">
-            <input className="input" value={confirmedBy} onChange={(e) => setConfirmedBy(e.target.value)} placeholder="Jane Doe" />
+            <Input value={confirmedBy} onChange={(e) => setConfirmedBy(e.target.value)} placeholder="Jane Doe" />
           </Field>
           <label className="flex items-start gap-2 text-sm">
-            <input type="checkbox" className="mt-0.5" checked={permissionChecked} onChange={(e) => setPermissionChecked(e.target.checked)} />
+            <Checkbox className="mt-0.5" checked={permissionChecked} onCheckedChange={(v) => setPermissionChecked(v === true)} />
             I confirm that I own <strong className="mx-1">{baseUrl}</strong> or have explicit permission from its owner to run this audit.
           </label>
           <WizardFooter onBack={existingSite ? undefined : () => setStep(0)} onNext={handleDiscover} nextDisabled={!confirmedBy.trim() || !permissionChecked} busy={busy} nextLabel="Discover pages" />
-        </div>
+        </Card>
       )}
 
       {step === 2 && (
-        <div className="card flex items-center justify-center gap-3 p-12 text-[var(--text-muted)]">
+        <Card className="flex items-center justify-center gap-3 p-12 text-[var(--text-muted)]">
           <Loader2 className="animate-spin" /> Discovering pages…
-        </div>
+        </Card>
       )}
 
       {step === 3 && discovered && (
-        <div className="card flex flex-col gap-4 p-6">
+        <Card className="p-6">
           <h2 className="flex items-center gap-2 font-medium"><ListChecks size={18} /> Select pages to audit ({selectedCount} selected)</h2>
           {robotsNote && <p className="text-xs text-[var(--text-muted)]">{robotsNote}</p>}
           <div className="max-h-96 overflow-y-auto rounded-lg border border-[var(--border)]">
             {discovered.map((p, i) => (
               <label key={p.url} className={`flex items-center gap-3 border-b border-[var(--border)] px-3 py-2 text-sm last:border-b-0 ${!p.loadOk ? "opacity-60" : ""}`}>
-                <input
-                  type="checkbox"
+                <Checkbox
                   checked={p.selected}
-                  onChange={(e) => {
+                  onCheckedChange={(v) => {
                     const copy = [...discovered];
-                    copy[i] = { ...p, selected: e.target.checked };
+                    copy[i] = { ...p, selected: v === true };
                     setDiscovered(copy);
                   }}
                 />
@@ -254,29 +265,29 @@ export function NewAuditWizard({
             ))}
           </div>
           <div className="flex gap-2">
-            <input className="input flex-1" placeholder="Add a page URL manually" value={manualUrl} onChange={(e) => setManualUrl(e.target.value)} />
-            <button type="button" onClick={addManualUrl} className="rounded-lg border border-[var(--border)] px-3 py-2 text-sm">Add</button>
+            <Input className="flex-1" placeholder="Add a page URL manually" value={manualUrl} onChange={(e) => setManualUrl(e.target.value)} />
+            <Button type="button" variant="outline" onClick={addManualUrl}>Add</Button>
           </div>
           <WizardFooter onBack={() => setStep(1)} onNext={() => setStep(4)} nextDisabled={selectedCount === 0} />
-        </div>
+        </Card>
       )}
 
       {step === 4 && (
-        <div className="card flex flex-col gap-4 p-6">
+        <Card className="p-6">
           <h2 className="flex items-center gap-2 font-medium"><Settings2 size={18} /> Audit settings</h2>
           <Field label="Lighthouse runs per page (median is reported, since single runs vary)">
-            <input className="input" type="number" min={1} max={5} value={lighthouseRuns} onChange={(e) => setLighthouseRuns(Number(e.target.value))} />
+            <Input type="number" min={1} max={5} value={lighthouseRuns} onChange={(e) => setLighthouseRuns(Number(e.target.value))} />
           </Field>
           <div className="flex gap-4 text-sm">
-            <label className="flex items-center gap-2"><input type="checkbox" checked={devices.mobile} onChange={(e) => setDevices({ ...devices, mobile: e.target.checked })} /> Mobile</label>
-            <label className="flex items-center gap-2"><input type="checkbox" checked={devices.desktop} onChange={(e) => setDevices({ ...devices, desktop: e.target.checked })} /> Desktop</label>
+            <label className="flex items-center gap-2"><Checkbox checked={devices.mobile} onCheckedChange={(v) => setDevices({ ...devices, mobile: v === true })} /> Mobile</label>
+            <label className="flex items-center gap-2"><Checkbox checked={devices.desktop} onCheckedChange={(v) => setDevices({ ...devices, desktop: v === true })} /> Desktop</label>
           </div>
           <label className="flex items-start gap-2 text-sm">
-            <input type="checkbox" className="mt-0.5" checked={checkExposedFiles} onChange={(e) => setCheckExposedFiles(e.target.checked)} />
+            <Checkbox className="mt-0.5" checked={checkExposedFiles} onCheckedChange={(v) => setCheckExposedFiles(v === true)} />
             Also check for accidentally exposed files (.git, .env) — single polite request each, only run because you confirmed permission.
           </label>
           <WizardFooter onBack={() => setStep(3)} onNext={handleStart} nextDisabled={!devices.mobile && !devices.desktop} busy={busy} nextLabel="Start audit" />
-        </div>
+        </Card>
       )}
     </div>
   );
@@ -284,10 +295,10 @@ export function NewAuditWizard({
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <label className="flex flex-col gap-1 text-sm">
-      <span className="text-[var(--text-muted)]">{label}</span>
+    <div className="flex flex-col gap-1.5 text-sm">
+      <Label className="text-[var(--text-muted)]">{label}</Label>
       {children}
-    </label>
+    </div>
   );
 }
 
@@ -307,16 +318,11 @@ function WizardFooter({
   return (
     <div className="flex justify-between pt-2">
       {onBack ? (
-        <button type="button" onClick={onBack} className="rounded-lg border border-[var(--border)] px-4 py-2 text-sm">Back</button>
+        <Button type="button" variant="outline" onClick={onBack}>Back</Button>
       ) : <span />}
-      <button
-        type="button"
-        onClick={onNext}
-        disabled={nextDisabled || busy}
-        className="flex items-center gap-2 rounded-lg bg-[var(--accent)] px-4 py-2 text-sm font-medium text-[var(--accent-contrast)] disabled:opacity-50"
-      >
-        {busy && <Loader2 size={14} className="animate-spin" />} {nextLabel}
-      </button>
+      <Button type="button" onClick={onNext} disabled={nextDisabled || busy}>
+        {busy ? <Loader2 size={14} className="animate-spin" /> : nextLabel === "Start audit" ? <Check size={14} /> : null} {nextLabel}
+      </Button>
     </div>
   );
 }

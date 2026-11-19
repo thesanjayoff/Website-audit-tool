@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { X } from "lucide-react";
+import { X, AlertTriangle, OctagonAlert } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 
 type Alert = { id: string; siteId: string; severity: "warning" | "critical"; message: string };
 
@@ -18,10 +20,26 @@ export function AlertsBanner({ alerts }: { alerts: Alert[] }) {
   return (
     <div className="flex flex-col gap-2">
       {visible.map((a) => (
-        <div key={a.id} className={`flex items-center justify-between rounded-lg border p-3 text-sm ${a.severity === "critical" ? "border-[var(--bad)]/40 bg-[var(--bad)]/10 text-[var(--bad)]" : "border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300"}`}>
-          <span>{a.message}</span>
-          <button onClick={() => dismiss(a.id)} aria-label="Dismiss"><X size={14} /></button>
-        </div>
+        <Alert
+          key={a.id}
+          variant={a.severity === "critical" ? "destructive" : "default"}
+          className={a.severity === "warning" ? "border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300 [&>svg]:text-amber-600 dark:[&>svg]:text-amber-300" : undefined}
+        >
+          {a.severity === "critical" ? <OctagonAlert /> : <AlertTriangle />}
+          <AlertDescription className="flex items-center justify-between gap-3 text-current">
+            <span>{a.message}</span>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-xs"
+              onClick={() => dismiss(a.id)}
+              aria-label="Dismiss"
+              className="shrink-0"
+            >
+              <X size={14} />
+            </Button>
+          </AlertDescription>
+        </Alert>
       ))}
     </div>
   );
