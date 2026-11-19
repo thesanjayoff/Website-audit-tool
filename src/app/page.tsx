@@ -7,7 +7,8 @@ import { ScoreRing } from "@/components/ui/ScoreRing";
 import { Badge } from "@/components/ui/Badge";
 import { AlertsBanner } from "@/components/AlertsBanner";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { Copy } from "@/components/Copy";
 
 export const dynamic = "force-dynamic";
@@ -28,9 +29,9 @@ export default async function DashboardPage() {
             {projects.length} project{projects.length === 1 ? "" : "s"} · {clientSites.length} site{clientSites.length === 1 ? "" : "s"}
           </p>
         </div>
-        <Button render={<Link href="/new-audit" />}>
+        <Link href="/new-audit" className={cn(buttonVariants())}>
           <Plus size={16} /> New audit
-        </Button>
+        </Link>
       </div>
 
       {clientSites.length === 0 ? (

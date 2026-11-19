@@ -4,19 +4,20 @@ import Link from "next/link";
 import { useState } from "react";
 import { ScanSearch, Menu, X } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export function NavBar() {
   const [open, setOpen] = useState(false);
 
   const links = (
     <>
-      <Button variant="ghost" size="sm" render={<Link href="/" />} onClick={() => setOpen(false)}>
+      <Link href="/" className={cn(buttonVariants({ variant: "ghost", size: "sm" }))} onClick={() => setOpen(false)}>
         Dashboard
-      </Button>
-      <Button variant="ghost" size="sm" render={<Link href="/settings" />} onClick={() => setOpen(false)}>
+      </Link>
+      <Link href="/settings" className={cn(buttonVariants({ variant: "ghost", size: "sm" }))} onClick={() => setOpen(false)}>
         Settings
-      </Button>
+      </Link>
     </>
   );
 

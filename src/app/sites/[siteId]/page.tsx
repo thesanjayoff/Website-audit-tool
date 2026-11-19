@@ -12,7 +12,8 @@ import { Badge } from "@/components/ui/Badge";
 import { TrendChart, type TrendPoint } from "@/components/TrendChart";
 import { ScheduleManager } from "@/components/ScheduleManager";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Copy } from "@/components/Copy";
@@ -62,9 +63,9 @@ export default async function SiteDetailPage({ params }: { params: Promise<{ sit
             </Copy>
             <p className="text-sm text-[var(--text-muted)]">{site.baseUrl}</p>
           </div>
-          <Button render={<Link href={`/new-audit?siteId=${site.id}`} />}>
+          <Link href={`/new-audit?siteId=${site.id}`} className={cn(buttonVariants())}>
             <RefreshCw size={14} /> Re-audit
-          </Button>
+          </Link>
         </div>
       </div>
 
@@ -131,9 +132,9 @@ export default async function SiteDetailPage({ params }: { params: Promise<{ sit
       <Card className="p-6">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="flex items-center gap-2 font-medium"><Users size={16} /> Competitor comparison</h2>
-          <Button variant="link" size="sm" className="h-auto p-0" render={<Link href={`/new-audit?competitorOf=${site.id}`} />}>
+          <Link href={`/new-audit?competitorOf=${site.id}`} className={cn(buttonVariants({ variant: "link", size: "sm" }), "h-auto p-0")}>
             <Plus size={14} /> Add competitor
-          </Button>
+          </Link>
         </div>
         {competitorLatest.length === 0 ? (
           <p className="text-sm text-[var(--text-muted)]">Add up to 3 competitor sites to compare scores side by side.</p>
