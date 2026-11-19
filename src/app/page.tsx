@@ -42,7 +42,7 @@ export default async function DashboardPage() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {clientSites.map(({ site, project, latestAudit }) => (
             <Link key={site.id} href={`/sites/${site.id}`}>
-              <Card className="h-full p-5 transition hover:border-[var(--accent)]/50 hover:shadow-md">
+              <Card className="h-full p-5 transition-[border-color,box-shadow,transform] duration-300 hover:-translate-y-0.5 hover:border-[var(--accent)]/50 hover:shadow-md">
                 <div className="flex items-start justify-between gap-2">
                   <div>
                     <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)]">

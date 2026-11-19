@@ -50,6 +50,25 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: var(--accent);
+
+  /* Fluid design tokens. Re-tuned from a marketing-site motion system for a
+     dense dashboard: no display-size type here, just a scale that keeps
+     page titles and section rhythm proportional instead of snapping at
+     breakpoints. */
+  --step--1: clamp(0.8rem, 0.78rem + 0.1vw, 0.85rem);
+  --step-0: clamp(0.875rem, 0.85rem + 0.12vw, 0.9375rem);
+  --step-1: clamp(1rem, 0.97rem + 0.14vw, 1.0625rem);
+  --step-2: clamp(1.125rem, 1.07rem + 0.26vw, 1.25rem);
+  --step-3: clamp(1.35rem, 1.26rem + 0.45vw, 1.6rem);
+
+  --gutter: clamp(1rem, 0.85rem + 0.7vw, 1.5rem);
+  --section-y: clamp(1.5rem, 1.3rem + 0.9vw, 2rem);
+  --stack: clamp(1.25rem, 1.1rem + 0.7vw, 1.75rem);
+
+  /* One shared hover/transition curve used everywhere via Tailwind's
+     default-transition-timing-function, instead of each component picking
+     its own ease. */
+  --ease-hover: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .dark {
@@ -168,6 +187,10 @@ html, body {
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* Applies --ease-hover to every unqualified `transition-*` utility
+     (including shadcn's own components) without touching each file. */
+  --default-transition-timing-function: var(--ease-hover);
 }
 
 @layer base {
@@ -179,5 +202,25 @@ html, body {
   }
   html {
     @apply font-sans;
+  }
+  h1 {
+    letter-spacing: -0.015em;
+  }
+  h2,
+  h3 {
+    letter-spacing: -0.01em;
+  }
+}
+
+/* Respect the OS-level motion preference app-wide, not just on individual
+   animated components. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
