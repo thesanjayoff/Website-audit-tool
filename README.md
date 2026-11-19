@@ -202,6 +202,20 @@ so generated components stay on-brand automatically in both themes. Dark mode
 toggles the standard `.dark` class on `<html>` via `next-themes`. To add another
 component: `npx shadcn@latest add <name>`.
 
+**Theme**: a black-and-gold editorial palette (dark mode) with a cream/gold
+counterpart (light mode), Manrope + DM Mono typography, fluid `clamp()` type
+and spacing tokens (`--step-*`, `--gutter`, `--section-y`, `--stack`).
+
+**Motion**: GSAP + `@gsap/react` + Lenis smooth scroll (`src/lib/gsap.ts`,
+`src/components/SmoothScroll.tsx`). `src/components/Copy.tsx` does the
+SplitText line-mask text reveal used on page headings. `src/components/
+PinnedStack.tsx` is the scroll-pinned card stack, deliberately scoped to
+short, bounded lists (e.g. the audit report's top-5 fixes) — not used
+anywhere list length is unbounded, where pinning would fight scanning. The
+mobile nav menu is a fullscreen circle-wipe (`.circle-menu` in globals.css).
+A session-gated counter preloader lives in `src/components/Preloader.tsx`.
+Everything respects `prefers-reduced-motion`.
+
 ## References and prior art
 
 Built from scratch with original code, following the public documentation

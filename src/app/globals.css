@@ -5,17 +5,21 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --bg: #f6f7fb;
+  /* Krish CoWorks black & gold re-skin. The source system is dark-only;
+     this light mode is our own counterpart in the same gold hue family
+     (parchment/cream instead of ink) so the existing theme toggle keeps
+     working instead of being removed. */
+  --bg: #fbf6ec;
   --bg-elevated: #ffffff;
-  --border: #e4e7ee;
-  --text: #171923;
-  --text-muted: #5b6475;
-  --accent: #4f46e5;
+  --border: rgba(115, 92, 59, 0.18);
+  --text: #241c10;
+  --text-muted: #6e5a3c;
+  --accent: #9c7830;
   --accent-contrast: #ffffff;
-  --good: #16a34a;
-  --warn: #d97706;
-  --bad: #dc2626;
-  --critical: #991b1b;
+  --good: #15803d;
+  --warn: #b45309;
+  --bad: #b91c1c;
+  --critical: #7f1d1d;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -72,17 +76,18 @@
 }
 
 .dark {
-  --bg: #0b0e14;
-  --bg-elevated: #12161f;
-  --border: #232838;
-  --text: #e6e8ee;
-  --text-muted: #94a0b8;
-  --accent: #818cf8;
-  --accent-contrast: #0b0e14;
-  --good: #4ade80;
-  --warn: #fbbf24;
-  --bad: #f87171;
-  --critical: #fca5a5;
+  /* Krish CoWorks ramp: ink-600/500/450 surfaces, gold-100/250/300 text. */
+  --bg: #0b0906;
+  --bg-elevated: #1b1913;
+  --border: rgba(224, 185, 114, 0.16);
+  --text: #f7edd5;
+  --text-muted: #cba155;
+  --accent: #e0b972;
+  --accent-contrast: #0b0906;
+  --good: #8fbf6b;
+  --warn: #f0a868;
+  --bad: #e2695c;
+  --critical: #c94a3d;
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
@@ -204,11 +209,89 @@ html, body {
     @apply font-sans;
   }
   h1 {
-    letter-spacing: -0.015em;
+    letter-spacing: -0.02em;
   }
   h2,
   h3 {
-    letter-spacing: -0.01em;
+    letter-spacing: -0.012em;
+  }
+}
+
+/* --- Krish CoWorks motion system: signature pieces ----------------------- */
+
+/* Eyebrow / mono labels, the DM Mono half of the type pairing. */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+/* Session-gated counter preloader. */
+.preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  color: var(--text);
+}
+.preloader__count {
+  font-family: var(--font-mono);
+  font-size: clamp(2rem, 1.6rem + 3vw, 4rem);
+  letter-spacing: -0.02em;
+}
+.preloader__panel {
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+  background: var(--accent);
+}
+
+/* Card hover lift + gold glow, the restrained version of the source
+   system's cursor-tracked radial glow (static, not mouse-coupled). */
+.glow-card {
+  position: relative;
+  isolation: isolate;
+}
+.glow-card::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: radial-gradient(120% 120% at 50% 0%, color-mix(in oklab, var(--accent) 22%, transparent), transparent 60%);
+  opacity: 0;
+  transition: opacity 0.4s var(--ease-hover);
+  pointer-events: none;
+  z-index: -1;
+}
+.glow-card:hover::after,
+.glow-card:focus-visible::after {
+  opacity: 1;
+}
+
+/* Fullscreen circle-wipe mobile menu. Expands from the trigger button to
+   cover the viewport, per the source system's "fullscreen overlay becomes
+   the mobile menu" pattern. */
+.circle-menu {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  background: var(--bg-elevated);
+  clip-path: circle(0% at calc(100% - 2.25rem) 1.75rem);
+  transition: clip-path 0.6s var(--ease-hover);
+  pointer-events: none;
+}
+.circle-menu[data-open="true"] {
+  clip-path: circle(150% at calc(100% - 2.25rem) 1.75rem);
+  pointer-events: auto;
+}
+@media (prefers-reduced-motion: reduce) {
+  .circle-menu {
+    transition: none;
   }
 }
 

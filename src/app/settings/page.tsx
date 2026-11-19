@@ -1,5 +1,6 @@
 import { getBranding } from "@/server/repo/settings";
 import { BrandingForm } from "./BrandingForm";
+import { Copy } from "@/components/Copy";
 
 export const dynamic = "force-dynamic";
 
@@ -8,7 +9,9 @@ export default async function SettingsPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-semibold">Settings</h1>
+        <Copy animateOnScroll={false}>
+          <h1 className="text-2xl font-semibold">Settings</h1>
+        </Copy>
         <p className="text-sm text-[var(--text-muted)]">
           All data stays local in <code>data/audit-tool.sqlite</code>. Optional field-data (CrUX) and AI layer keys are configured via
           environment variables — see <code>.env.example</code>.

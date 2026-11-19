@@ -15,6 +15,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Copy } from "@/components/Copy";
 
 export const dynamic = "force-dynamic";
 
@@ -56,7 +57,9 @@ export default async function SiteDetailPage({ params }: { params: Promise<{ sit
         <Link href="/" className="flex items-center gap-1 text-sm text-[var(--text-muted)] hover:text-[var(--text)]"><ArrowLeft size={14} /> Dashboard</Link>
         <div className="mt-1 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-semibold">{site.label}</h1>
+            <Copy animateOnScroll={false}>
+              <h1 className="text-2xl font-semibold">{site.label}</h1>
+            </Copy>
             <p className="text-sm text-[var(--text-muted)]">{site.baseUrl}</p>
           </div>
           <Button render={<Link href={`/new-audit?siteId=${site.id}`} />}>

@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/Badge";
 import { AlertsBanner } from "@/components/AlertsBanner";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Copy } from "@/components/Copy";
 
 export const dynamic = "force-dynamic";
 
@@ -20,8 +21,10 @@ export default async function DashboardPage() {
       <AlertsBanner alerts={alerts} />
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold">Dashboard</h1>
-          <p className="text-sm text-[var(--text-muted)]">
+          <Copy animateOnScroll={false}>
+            <h1 className="text-2xl font-semibold">Dashboard</h1>
+          </Copy>
+          <p className="eyebrow mt-1">
             {projects.length} project{projects.length === 1 ? "" : "s"} · {clientSites.length} site{clientSites.length === 1 ? "" : "s"}
           </p>
         </div>
@@ -42,7 +45,7 @@ export default async function DashboardPage() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {clientSites.map(({ site, project, latestAudit }) => (
             <Link key={site.id} href={`/sites/${site.id}`}>
-              <Card className="h-full p-5 transition-[border-color,box-shadow,transform] duration-300 hover:-translate-y-0.5 hover:border-[var(--accent)]/50 hover:shadow-md">
+              <Card className="glow-card h-full p-5 transition-[border-color,box-shadow,transform] duration-300 hover:-translate-y-0.5 hover:border-[var(--accent)]/50 hover:shadow-md">
                 <div className="flex items-start justify-between gap-2">
                   <div>
                     <div className="flex items-center gap-1.5 text-xs text-[var(--text-muted)]">

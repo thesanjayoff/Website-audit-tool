@@ -15,6 +15,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { PinnedStack } from "@/components/PinnedStack";
+import { Copy } from "@/components/Copy";
 
 export const dynamic = "force-dynamic";
 
@@ -49,7 +51,9 @@ export default async function AuditDetailPage({ params }: { params: Promise<{ au
           <Link href={`/sites/${site.id}`} className="flex items-center gap-1 text-sm text-[var(--text-muted)] hover:text-[var(--text)]">
             <ArrowLeft size={14} /> Back to {site.label}
           </Link>
-          <h1 className="mt-1 text-2xl font-semibold">{site.label} — audit report</h1>
+          <Copy animateOnScroll={false}>
+            <h1 className="mt-1 text-2xl font-semibold">{site.label} — audit report</h1>
+          </Copy>
           <p className="text-sm text-[var(--text-muted)]">{site.baseUrl} · {new Date(audit.startedAt).toLocaleString()}</p>
         </div>
         <DropdownMenu>
@@ -115,9 +119,11 @@ export default async function AuditDetailPage({ params }: { params: Promise<{ au
 
       <section>
         <h2 className="mb-3 text-lg font-medium">Top 5 fixes</h2>
-        <div className="flex flex-col gap-3">
-          {topFixes.length === 0 ? <p className="text-sm text-[var(--text-muted)]">No open findings — nice work.</p> : topFixes.map((f) => <FindingCard key={f.id} finding={f} />)}
-        </div>
+        {topFixes.length === 0 ? (
+          <p className="text-sm text-[var(--text-muted)]">No open findings — nice work.</p>
+        ) : (
+          <PinnedStack>{topFixes.map((f) => <FindingCard key={f.id} finding={f} />)}</PinnedStack>
+        )}
       </section>
 
       <section>
